@@ -1,0 +1,44 @@
+name: PHP
+
+on: [push, pull_request, deployment]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: security-checker
+        uses: docker://jakzal/phpqa:php8.0-alpine
+        with:
+          args: local-php-security-checker composer.lock
+        continue-on-error: false
+
+      - name: phpcs-security
+        uses: docker://jakzal/phpqa:php8.0-alpine
+        with:
+          args: phpcs -v --extensions=php,inc,lib,module,info --standard=Security --ignore=./src/Kernel.php ./src
+        continue-on-error: false
+
+  static-code-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: php-stan
+        uses: docker://jakzal/phpqa:php8.0-alpine
+        with:
+          args: phpstan analyze src/ -l 1
+        continue-on-error: true
+
+      - name: phpcs
+        uses: docker://jakzal/phpqa:php8.0-alpine
+        with:
+          args: phpcs -v --standard=PSR2 --ignore=./src/Kernel.php ./src
+        continue-on-error: true
+
+      - name: php-lint
+        uses: docker://jakzal/phpqa:php8.0-alpine
+        with:
+          args: phplint --exclude=./src/Kernel.php ./src
+        continue-on-error: true
