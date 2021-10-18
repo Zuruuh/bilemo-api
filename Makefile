@@ -86,8 +86,7 @@ vendor: composer.lock
 env:
 	@if [ -f .env.local ]; \
 	then\
-		echo 'You already have a .env.local file !';\
-		exit 1;\
+		echo '.env.local already exists.';\
 	else\
 		touch .env.local;\
 		echo 'APP_ENV=dev' >> .env.local;\
