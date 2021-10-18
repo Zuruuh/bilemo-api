@@ -24,7 +24,7 @@ kill:
 	$(DOCKER_COMPOSE) down --volumes --remove-orphans
 
 install: ## Install and start the project
-install: .env.local build start db
+install: env .env.local build start db
 
 reset: ## Stop and start a fresh install of the project
 reset: kill install
@@ -83,7 +83,19 @@ vendor: composer.lock
 		cp .env .env.local;\
 	fi
 
-.PHONY: db migration db-validate-schema
+env:
+	@if [ -f .env.local ]; \
+	then\
+		echo 'You already have a .env.local file !';\
+		exit 1;\
+	else\
+		touch .env.local;\
+		echo 'APP_ENV=dev' >> .env.local;\
+		echo 'APP_SECRET=bed224227aa1bd358ebc5c3d12cceb56' >> .env.local;\
+		echo 'DATABASE_URL="postgresql://symfony:symfony@database/app"' >> .env.local;\
+	fi
+
+.PHONY: db migration db-validate-schema env
 
 ## 
 ## -----
