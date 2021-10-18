@@ -47,12 +47,8 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: unit-tests
-        working-directory: ./
-        run: make tu
-        continue-on-error: false
-
-      - name: functional-tests
-        working-directory: ./
-        run: make tf
+      - name: tests
+        uses: docker://jakzal/phpqa:php8.0-alpine
+        with:
+          args: php bin/phpunit
         continue-on-error: false
