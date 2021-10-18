@@ -91,18 +91,11 @@ vendor: composer.lock
 ## 
 ## 
 
-test: ## Run unit and functional tests
-test: tu tf
+test: ## Run all tests in the tests/ folder
+test:
+	$(EXEC_PHP) bin/phpunit
 
-tu: ## Run unit tests
-tu: vendor
-	$(EXEC_PHP) bin/phpunit --exclude-group functional
-
-tf: ## Run functional tests
-tf: vendor
-	$(EXEC_PHP) bin/phpunit --group functional
-
-.PHONY: test tu tf
+.PHONY: test
 
 
 .DEFAULT_GOAL := help

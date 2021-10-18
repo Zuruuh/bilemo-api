@@ -42,3 +42,13 @@ jobs:
         with:
           args: phplint --exclude=./src/Kernel.php ./src
         continue-on-error: true
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: tests
+        uses: docker://jakzal/phpqa:php8.0-alpine
+        with:
+          args: php bin/phpunit
+        continue-on-error: false
