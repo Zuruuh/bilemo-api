@@ -42,3 +42,16 @@ jobs:
         with:
           args: phplint --exclude=./src/Kernel.php ./src
         continue-on-error: true
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: unit-tests
+        with:
+          args: make tu
+        continue-on-error: false
+      - name: functional-tests
+        with:
+          args: make tf
+        continue-on-error: true
