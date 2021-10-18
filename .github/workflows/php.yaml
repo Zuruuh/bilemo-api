@@ -48,10 +48,11 @@ jobs:
       - uses: actions/checkout@master
 
       - name: unit-tests
-        with:
-          args: make tu
+        working-directory: ./
+        run: make tu
         continue-on-error: false
+
       - name: functional-tests
-        with:
-          args: make tf
-        continue-on-error: true
+        working-directory: ./
+        run: make tf
+        continue-on-error: false
