@@ -24,7 +24,8 @@ kill:
 	$(DOCKER_COMPOSE) down --volumes --remove-orphans
 
 install: ## Install and start the project
-install: env .env.local build start db
+install: .env.local build start keys db
+#install: env .env.local build start db
 
 reset: ## Stop and start a fresh install of the project
 reset: kill install
@@ -94,7 +95,10 @@ env:
 		echo 'DATABASE_URL="postgresql://symfony:symfony@database/app"' >> .env.local;\
 	fi
 
-.PHONY: db migration db-validate-schema env
+keys: vendor start
+	$(EXEC_PHP) bin/console lexik:jwt:generate-keypair --skip-if-exists
+
+.PHONY: db migration db-validate-schema env keys
 
 ## 
 ## -----
