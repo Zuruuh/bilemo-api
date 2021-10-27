@@ -2,9 +2,10 @@
 
 namespace App\Tests;
 
+use App\Entity\Client;
+use App\Service\ClientService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
 
 class ClientTest extends KernelTestCase
 {
@@ -12,22 +13,28 @@ class ClientTest extends KernelTestCase
     const PASSWORD = "client_password";
     const EMAIL    = "client_email";
 
-    public function test_setters(UserPasswordHasherInterface $hasher): void
+    public function test_setters(): void
     {
-        // * Initialization
+        $kernel = self::bootKernel();
+        $container = static::getContainer();
+
+        $hasher = $container->get(ClientService::class);
+
         $client = new Client();
         $password = $hasher->hashPassword($client, self::PASSWORD);
 
-        $client->setUsername(self::USERNAME)
-            ->setPassword($password)
-            ->setEmail(self::EMAIL);
+        $client->setUsername(self::USERNAME);
+        $client->setEmail(self::EMAIL);
+        $client->setPassword($password);
 
-        // * Tests
-
-        $this->assertTrue($client->getUsername === self::USERNAME);
+        $this->assertTrue(
+            $client->getUserIdentifier() === self::USERNAME
+        );
+        $this->assertTrue(
+            $client->getEmail() === self::EMAIL
+        );
         $this->assertTrue(
             $hasher->isPasswordValid($client, self::PASSWORD)
         );
-        $this->assertTrue($client->getEmail === self::EMAIL);
     }
 }
