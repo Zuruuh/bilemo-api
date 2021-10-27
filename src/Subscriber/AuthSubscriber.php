@@ -23,18 +23,30 @@ class AuthSubscriber implements EventSubscriberInterface
     public function onKernelController(ControllerEvent $event)
     {
         $controller = $event->getController();
+        $request = $event->getRequest();
         if (is_array($controller)) {
             $controller = $controller[0];
         }
 
+        $content = $request->getContent();
+        if (gettype($content) === 'string') {
+            $json = json_decode($content) ?? (object) [];
+
+            $requestClosure = function () use ($json) {
+                $this->content = $json;
+                return $this;
+            };
+            $request = $requestClosure->call($request);
+        }
+
         if ($controller instanceof ProtectedRoute) {
-            $authorization = $event->getRequest()->headers->all("authorization");
+            $authorization = $request->headers->all('authorization');
 
             if (
                 !isset($authorization[0]) ||
                 (bool) !$this->auth_service->validateToken($authorization[0], true)
             ) {
-                throw new AccessDeniedHttpException('This action needs a valid token!');
+                throw new AccessDeniedHttpException(AuthService::INVALID_TOKEN);
             }
         }
     }
@@ -51,7 +63,7 @@ class AuthSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $authorization = $event->getRequest()->headers->all("authorization");
+        $authorization = $event->getRequest()->headers->all('authorization');
         if (
             !isset($authorization[0]) ||
             !($payload = $this->auth_service->validateToken($authorization[0], false))
@@ -62,7 +74,7 @@ class AuthSubscriber implements EventSubscriberInterface
         if (!$jwt) {
             return;
         }
-        $content += ["token" => $jwt];
+        $content += ['token' => $jwt];
 
         $response->setContent(json_encode($content));
         return $response;
