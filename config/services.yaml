@@ -15,11 +15,11 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
-        exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
-            - '../src/Kernel.php'
-            - '../src/Tests/'
+        exclude: '../src/{DependencyInjection,Entity,Tests,Kernel.php}'
 
+    App\Subscriber\AuthSubscriber:
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller }
+            - { name: kernel.event_listener, event: kernel.response }
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
