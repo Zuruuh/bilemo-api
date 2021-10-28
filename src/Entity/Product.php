@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -43,6 +44,11 @@ class Product
     private $stock;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private $storage;
+
+    /**
      * @ORM\Column(type="datetime_immutable")
      */
     private $createdAt;
@@ -52,10 +58,11 @@ class Product
      */
     private $lastUpdate;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $storage;
+    public function __construct()
+    {
+        $this->createdAt = new DateTimeImmutable();
+        $this->lastUpdate = new DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -122,6 +129,18 @@ class Product
         return $this;
     }
 
+    public function getStorage(): ?int
+    {
+        return $this->storage;
+    }
+
+    public function setStorage(int $storage): self
+    {
+        $this->storage = $storage;
+
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -142,18 +161,6 @@ class Product
     public function setLastUpdate(\DateTimeImmutable $lastUpdate): self
     {
         $this->lastUpdate = $lastUpdate;
-
-        return $this;
-    }
-
-    public function getStorage(): ?int
-    {
-        return $this->storage;
-    }
-
-    public function setStorage(int $storage): self
-    {
-        $this->storage = $storage;
 
         return $this;
     }
