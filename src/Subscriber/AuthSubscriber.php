@@ -27,11 +27,10 @@ class AuthSubscriber implements EventSubscriberInterface
     {
         $controller = $event->getController();
         $request = $event->getRequest();
-        if (is_array($controller)) {
-            $controller = $controller[0];
-        }
-
         $content = $request->getContent();
+
+        $controller = is_array($controller) ? $controller[0] : $controller;
+
         if (gettype($content) === 'string') {
             $json = json_decode($content) ?? (object) [];
 

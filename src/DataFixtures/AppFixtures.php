@@ -11,6 +11,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    const PRODUCT_AMOUNT = 110;
+
     private UserPasswordHasherInterface $hasher;
 
     public function __construct(UserPasswordHasherInterface $hasher)
@@ -30,7 +32,7 @@ class AppFixtures extends Fixture
             ->setEmail('younesziadi@outlook.fr')
             ->setPassword($password);
 
-        for ($i = 0; $i < 110; ++$i) {
+        for ($i = 0; $i < self::PRODUCT_AMOUNT; ++$i) {
             $product = (new Product())
                 ->setName($faker->word())
                 ->setOs($faker->word())
