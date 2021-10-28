@@ -13,10 +13,13 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class AuthSubscriber implements EventSubscriberInterface
 {
     private AuthService $auth_service;
+    private bool $dev;
 
     public function __construct(
-        AuthService $auth_service
+        AuthService $auth_service,
+        string $env
     ) {
+        $this->dev = $env === "dev";
         $this->auth_service = $auth_service;
     }
 
@@ -60,6 +63,10 @@ class AuthSubscriber implements EventSubscriberInterface
 
         $content = json_decode($response->getContent(), true);
         if (!$content) {
+            return;
+        }
+
+        if (isset($content['code']) && $content['code'] === 500) {
             return;
         }
 

@@ -18,10 +18,14 @@ services:
         exclude: '../src/{DependencyInjection,Entity,Tests,Kernel.php}'
 
     App\Subscriber\AuthSubscriber:
+        arguments: 
+            $env: "%kernel.environment%"
         tags:
             - { name: kernel.event_listener, event: kernel.controller }
             - { name: kernel.event_listener, event: kernel.response }
     App\Subscriber\ExceptionSubscriber:
+        arguments: 
+            $env: "%kernel.environment%"
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
     # add more service definitions when explicit configuration is needed
