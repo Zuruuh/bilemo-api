@@ -6,7 +6,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ExceptionSubscriber implements EventSubscriberInterface
 {
@@ -31,11 +30,13 @@ class ExceptionSubscriber implements EventSubscriberInterface
                 'code' => 500
             ];
             if ($this->dev) {
-                $json += ["stackTrace" => [
-                    "message" => $message,
-                    "file" => $throwable->getFile(),
-                    "line" => $throwable->getLine(),
-                ]];
+                $json += [
+                    "stackTrace" => [
+                        "message" => $message,
+                        "file" => $throwable->getFile(),
+                        "line" => $throwable->getLine(),
+                    ]
+                ];
             }
 
             $event->setResponse(
