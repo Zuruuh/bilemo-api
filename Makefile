@@ -63,6 +63,13 @@ migration: ## Create a new doctrine migration
 migration: vendor
 	$(SYMFONY) doctrine:migrations:diff
 
+migrate: ## Migrates db to latest saved migration
+migrate: vendor
+	$(SYMFONY) doctrine:migration:migrate --no-interaction
+
+db-update-schema: ## Creates a new migrations and runs it
+db-update-schema: migration migrate
+
 db-validate-schema: ## Validate the database schema
 db-validate-schema: .env.local vendor
 	$(SYMFONY) doctrine:schema:validate
@@ -98,7 +105,7 @@ env:
 keys: vendor start
 	$(EXEC_PHP) bin/console lexik:jwt:generate-keypair --skip-if-exists
 
-.PHONY: db migration db-validate-schema env keys
+.PHONY: db migration migrate db-update-schema db-validate-schema env keys
 
 ## 
 ## -----
