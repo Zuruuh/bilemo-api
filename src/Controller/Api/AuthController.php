@@ -2,8 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Form\LoginFormType;
 use App\Service\AuthService;
-use stdClass;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,8 +23,8 @@ class AuthController extends AbstractController
     #[Route('/login', methods: ['POST'])]
     public function login(Request $request): JsonResponse
     {
-        $content = (object) $request->getContent();
+        $form = $this->createForm(LoginFormType::class);
 
-        return $this->auth_service->login($content);
+        return $this->auth_service->login($request, $form);
     }
 }
