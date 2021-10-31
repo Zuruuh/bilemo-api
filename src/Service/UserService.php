@@ -23,6 +23,8 @@ class UserService
     const USER_DOES_NOT_EXIST = 'There are no user with the id %s';
     const USER_CREATE_SUCCESS = 'User "%s" with id #%s has been successfully created !';
     const NOT_YOUR_USER = 'You are not the owner of this user';
+    const USER_DELETE_SUCCESS = 'The user "%s" has been successfully deleted !';
+    const USER_EDIT_SUCCESS = 'User "%s" with id #%s has been successfully updated !';
 
     public function __construct(
         UserRepository $user_repo,
@@ -85,7 +87,7 @@ class UserService
             $request->getContent()[AuthService::AUTH_UID]
         );
 
-        $user = $this->exists($id, $client);
+        $user = $this->exists($id);
         $this->checkOwner($user, $client);
 
         return new JsonResponse(['user' => $user]);
@@ -94,34 +96,40 @@ class UserService
     /**
      * Returns a user if it exists & throws an error if it doesn't
      * 
-     * @param int $id The user id 
+     * @param int  $id    The user id 
+     * @param bool $array Should the method return an entity or an array
      * 
      * @throws NotFoundHttpException If there are no users with this id
      * 
-     * @return User|null
+     * @return User|array|null
      */
-    private function exists(int $id): array
+    private function exists(int $id, bool $array = true): User|array|null
     {
-        $user = $this->user_repo->findOneByWithArray(['id' => $id]);
+        $user = $array ?
+            $this->user_repo->findOneByWithArray(['id' => $id]) :
+            $this->user_repo->findOneBy(['id' => $id]);
         if (!$user) {
             throw new NotFoundHttpException(sprintf(self::USER_DOES_NOT_EXIST, $id));
         }
-        return (array) $user[0];
+        return $array ? (array) $user[0] : $user;
     }
 
     /**
      * Verifies that the requested User belongs to the requesting Client
      * 
-     * @param array  $user_infos The user array
-     * @param Client $client     The client requesting the user
+     * @param User|array  $user_infos The user or user infos array
+     * @param Client      $client     The client requesting the user
      * 
      * @throws AccessDeniedHttpException If user does not belong to client
      * 
      * @return void
      */
-    private function checkOwner(array $user_infos, Client $client): void
+    private function checkOwner(mixed $user_infos, Client $client): void
     {
-        $user = $this->user_repo->find($user_infos['id']);
+        $user = $user_infos;
+        if (!($user instanceof User)) {
+            $user = $this->user_repo->find($user_infos['id']);
+        }
 
         if ($user->getClient()->getId() !== $client->getId()) {
             throw new AccessDeniedHttpException(self::NOT_YOUR_USER);
@@ -152,6 +160,14 @@ class UserService
         );
     }
 
+    /**
+     * Saves a user to database
+     * 
+     * @param FormInterface The user form
+     * @param array         $content The request content
+     * 
+     * @return User
+     */
     private function save(FormInterface $form, array $content)
     {
         $user = $form->getData();
@@ -162,5 +178,87 @@ class UserService
         $this->em->flush();
 
         return $this->user_repo->findOneByWithArray(['id' => $user->getId()])[0];
+    }
+
+    public function edit(Request $request, FormInterface $form_interface, int $id): JsonResponse
+    {
+        $content = (array) $request->getContent();
+        $form = $this->api_service->form($form_interface, $content);
+
+        if (!$form->valid) {
+            return $form->response ?? new JsonResponse();
+        }
+
+        $user = $this->update($form_interface, $content, $id);
+
+        $valid = $this->api_service->form($form_interface, $content);
+        if (!$valid->valid) {
+            return $valid->response;
+        }
+
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return new JsonResponse(
+            [
+                'message' => sprintf(self::USER_EDIT_SUCCESS, $user->getName(), $user->getId()),
+                'code' => 200
+            ],
+            200
+        );
+    }
+
+    private function update(FormInterface $form, array $content, int $id): User
+    {
+        $user = $this->exists($id, false);
+        $client = $this->client_service->getClientFromUsername(
+            $content[$this->auth_service::AUTH_UID]
+        );
+        $this->checkOwner($user, $client);
+
+        $updated_user = $this->updateProperties($user, $form->getData());
+
+        return $updated_user;
+    }
+
+    private function updateProperties(User $user, User $new_data): User
+    {
+        foreach (User::PROPERTIES as $property) {
+            $property_name = ucfirst($property);
+            $setter = sprintf('set%s', $property_name);
+            $getter = sprintf('get%s', $property_name);
+            $value = $new_data->$getter();
+
+            if (!$value || $value === $user->$getter()) {
+                $user->$setter($new_data->$getter());
+            }
+        }
+
+        return $user;
+    }
+
+    /**
+     * Deletes a user from database
+     * 
+     * @param Request $request The controller request
+     * @param int     $id      The user id
+     * 
+     * @return JsonResponse The json containing either an error or a success message
+     */
+    public function delete(Request $request, int $id): JsonResponse
+    {
+        $user = $this->exists($id, false);
+        $client = $this->client_service->getClientFromUsername(
+            $request->getContent()[$this->auth_service::AUTH_UID]
+        );
+        $this->checkOwner($user, $client);
+
+        $this->em->remove($user);
+        $this->em->flush();
+
+        return new JsonResponse([
+            'message' => sprintf(self::USER_DELETE_SUCCESS, $user->getName())
+        ]);
     }
 }
