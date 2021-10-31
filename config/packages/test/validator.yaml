@@ -2,4 +2,4 @@ framework:
     validation:
         not_compromised_password: false
     csrf_protection:
-        enabled: falsew
+        enabled: false
