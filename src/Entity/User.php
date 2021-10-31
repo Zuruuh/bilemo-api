@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class User
 {
+    const PROPERTIES = ['name', 'balance'];
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
