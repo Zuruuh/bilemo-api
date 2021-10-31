@@ -48,9 +48,19 @@ class ExceptionSubscriber implements EventSubscriberInterface
         $getStatusCode = self::STATUS_CODE;
         $code = $throwable->$getStatusCode();
 
+        $error_type = 'undefined_error_type';
+        switch ($code) {
+            case 403:
+                $error_type = 'auth';
+                break;
+            case 404:
+                $error_type = 'routing';
+                break;
+        }
+
         $content = [
             'errors' => [
-                'auth' => [
+                $error_type => [
                     'error' => $message,
                 ]
             ],
