@@ -2,25 +2,22 @@
 
 namespace App\Service;
 
-use stdClass;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception;
-
 
 class ApiService
 {
     const INVALID_REQ = "Invalid request, you need to specify a '%s' property";
 
-    public function form(FormInterface $form, array $content): object
+    public function form(FormInterface $form, array $content, bool $edit = false): object
     {
         $form_content = $content;
         if (isset($form_content[AuthService::AUTH_UID])) {
             unset($form_content[AuthService::AUTH_UID]);
         }
         if (!$form->isSubmitted()) {
-            $form->submit($form_content);
+            $form->submit($form_content, !$edit);
         }
 
         $errors = $form->getErrors(true);
