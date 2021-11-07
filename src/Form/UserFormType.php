@@ -19,7 +19,7 @@ class UserFormType extends AbstractType
     const NAME_MAX_LENGTH_MESSAGE = 'User\'s name cannot be longer than ' . self::NAME_MAX_LENGTH . ' characters';
 
     const BALANCE_MISSING_MESSAGE = 'You have to specify a balance !';
-    const BALANCE_INVALID_MESSAGE = 'Balance ({{ value }}) must be a valid {{ type }}';
+    const BALANCE_INVALID_MESSAGE = 'Balance ({{ value }}) must be a valid integer';
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -37,6 +37,7 @@ class UserFormType extends AbstractType
             ])
             ->add('balance', IntegerType::class, [
                 'empty_data' => 0,
+                'invalid_message' => self::BALANCE_INVALID_MESSAGE,
                 'constraints' => [
                     new Type([
                         'type' => 'integer',
