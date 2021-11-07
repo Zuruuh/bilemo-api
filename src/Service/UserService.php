@@ -59,13 +59,14 @@ class UserService
 
         $users = $this->user_repo->findByCursor($cursor, ['client' => $client->getId()]);
 
-        $index = $cursor;
-        $usersArray = array_map(function ($user) use ($index) {
-            ++$index;
+        $entity_cursor = $cursor;
+        $usersArray = [];
+        foreach ($users as $user) {
+            ++$entity_cursor;
             $entity = $user;
-            $entity['cursor'] = $index;
-            return $entity;
-        }, $users);
+            $entity['cursor'] = $entity_cursor;
+            $usersArray[] = $entity;
+        }
 
         return new JsonResponse(
             ['users' => $usersArray],
@@ -83,10 +84,7 @@ class UserService
      */
     public function getOne(Request $request, int $id): JsonResponse
     {
-        $client = $this->client_service->getClientFromUsername(
-            $request->getContent()[AuthService::AUTH_UID]
-        );
-
+        $client = $this->client_service->getClientFromUsername($request->getContent()[AuthService::AUTH_UID]);
         $user = $this->exists($id);
         $this->checkOwner($user, $client);
 
@@ -103,7 +101,7 @@ class UserService
      * 
      * @return User|array|null
      */
-    private function exists(int $id, bool $array = true): User|array|null
+    public function exists(int $id, bool $array = true): User|array|null
     {
         $user = $array ?
             $this->user_repo->findOneByWithArray(['id' => $id]) :
@@ -136,6 +134,14 @@ class UserService
         }
     }
 
+    /**
+     *  Creates a user & returns the operation status
+     * 
+     * @param Request       $request        The controller request
+     * @param FormInterface $form_interface The user form
+     * 
+     * @return JsonResponse The http response containing the operation status
+     */
     public function create(Request $request, FormInterface $form_interface): JsonResponse
     {
         $content = (array) $request->getContent();
@@ -180,6 +186,15 @@ class UserService
         return $this->user_repo->findOneByWithArray(['id' => $user->getId()])[0];
     }
 
+    /**
+     *  Edits a user & returns the operation status
+     * 
+     * @param Request       $request        The controller request
+     * @param FormInterface $form_interface The user form
+     * @param int           $id             The updated user's id
+     * 
+     * @return JsonResponse The http response containing the operation status
+     */
     public function edit(Request $request, FormInterface $form_interface, int $id): JsonResponse
     {
         $content = (array) $request->getContent();
