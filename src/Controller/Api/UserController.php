@@ -43,7 +43,8 @@ class UserController extends AbstractController implements ProtectedRoute
     #[Route('/edit/{id}', methods: ['PUT', 'PATCH'])]
     public function edit(Request $request, mixed $id): JsonResponse
     {
-        $form = $this->createForm(UserFormType::class);
+        $user = $this->user_service->exists($id, false);
+        $form = $this->createForm(UserFormType::class, $user);
 
         return $this->user_service->edit($request, $form, (int) $id);
     }
