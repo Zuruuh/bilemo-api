@@ -15,7 +15,7 @@ class ProductTest extends TestCase
     const PRICE        = 64900;
     const STOCK        = 9;
 
-    public function test_setters(): void
+    public function test_products_setters(): void
     {
         $CREATED_AT   = new DateTimeImmutable();
         $LAST_UPDATE  = new DateTimeImmutable();

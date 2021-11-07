@@ -17,7 +17,7 @@ jobs:
       - name: phpcs-security
         uses: docker://jakzal/phpqa:php8.0-alpine
         with:
-          args: phpcs -v --extensions=php,inc,lib,module,info --standard=Security --ignore=./src/Kernel.php ./src
+          args: phpcs -v --extensions=php,inc,lib,module,info --standard=Security --ignore=./src/Kernel.php ./src --warning-severity=0
         continue-on-error: false
 
   static-code-analysis:

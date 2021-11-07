@@ -8,90 +8,63 @@ use Symfony\Component\HttpKernel\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class AuthService
 {
     private JWTTokenManagerInterface $jwt_manager;
     private ClientService $client_service;
+    private ApiService $api_service;
 
-    const INVALID_USERNAME = 'There are no clients with this username.';
-    const INVALID_REQ = 'Invalid Request, please specify your username and your password.';
+    const INVALID_USERNAME = 'There are no client with this username.';
     const INVALID_CREDENTIALS = 'Invalid credentials. Make sure your password is correct.';
 
     const INVALID_TOKEN = 'This action needs a valid token!';
 
+    const AUTH_UID = '_auth';
+
     public function __construct(
         JWTTokenManagerInterface $jwt_manager,
         ClientService $client_service,
+        ApiService $api_service
     ) {
         $this->jwt_manager = $jwt_manager;
         $this->client_service = $client_service;
+        $this->api_service = $api_service;
     }
 
     /**
      * Logins a user by it's credentials & return a JWT
      * 
-     * @param stdClass $json<$username: string, $password: string>
+     * @param Request       The incoming http request
+     * @param FormInterface The login form
      * 
      * @return JsonResponse Response including either an error or a JWT
      */
-    public function login(stdClass $json): JsonResponse
+    public function login(Request $request, FormInterface $form_interface): JsonResponse
     {
-        $username = $this->getProperty($json, 'username');
-        $password = $this->getProperty($json, 'password');
+        $form = $this->api_service->form($form_interface, (array) $request->getContent());
 
-        $client = $this->exists($username);
-        $this->checkCredentials($client, $password);
+        if (!$form->valid) {
+            return $form->response ?? new JsonResponse();
+        }
+
+        $jwt = $this->checkCredentials((object) $form->content, $form_interface);
+
+        $valid = $this->api_service->form($form_interface, (array) $request->getContent());
+
+        if (!$valid->valid) {
+            return $valid->response;
+        }
 
         $res = [
-            'message' => 'Authentification success !',
+            'message' => 'Authentication success !',
             'code' => 200,
-            'token' => $this->generateJWT($client)
+            'token' => $jwt
         ];
 
         return new JsonResponse($res);
-    }
-
-    /**
-     * Checks if a user exists with a given username
-     * 
-     * @param string $username The user to check
-     * 
-     * @throws Exception\NotFoundHttpException If user does not exist
-     * 
-     * @return Client
-     */
-    private function exists(string $username): Client
-    {
-        $client = $this->client_service->getClientFromUsername($username);
-        if (!$client) {
-            throw new Exception\NotFoundHttpException(self::INVALID_USERNAME);
-        }
-
-        return $client;
-    }
-
-    /**
-     * Gets a property from an object
-     * 
-     * @param stdClass $json      The object to get the property from
-     * @param string   $property  The property to get
-     * @param bool     ?$throwing Is the property nullable ?
-     * 
-     * @throws Exception\BadRequestHttpException If property does not exist & throwing is set to true
-     * 
-     * @return mixed Property if it exists
-     */
-    private function getProperty(stdClass $json, string $property, bool $throwing = true): mixed
-    {
-        if (!isset($json->$property)) {
-            if ($throwing) {
-                throw new Exception\BadRequestHttpException(self::INVALID_REQ);
-            }
-            return null;
-        }
-
-        return $json->$property;
     }
 
     /**
@@ -104,12 +77,39 @@ class AuthService
      * 
      * @return void
      */
-    private function checkCredentials(Client $client, string $password): void
+    private function checkCredentials(stdClass $content, FormInterface $form): string|null
     {
-        $valid = $this->client_service->isPasswordValid($client, $password);
-        if (!$valid) {
-            throw new Exception\AccessDeniedHttpException(self::INVALID_CREDENTIALS);
+        $client = $this->exists($content);
+        if (!$client) {
+            $this->api_service->generateError('username', self::INVALID_USERNAME, $form);
+            return null;
         }
+
+        $valid = $this->client_service->isPasswordValid($client, $content->password);
+        if (!$valid) {
+            $this->api_service->generateError('password', self::INVALID_CREDENTIALS, $form);
+            return null;
+        }
+
+        return $this->generateJWT($client);
+    }
+
+    /**
+     * Checks if a user exists with a given username
+     * 
+     * @param string $username The user to check
+     * 
+     * @throws Exception\NotFoundHttpException If user does not exist
+     * 
+     * @return Client
+     */
+    private function exists(stdClass $content): Client|null
+    {
+        $client = $this->client_service->getClientFromUsername(
+            $content->username
+        );
+
+        return $client;
     }
 
     /**
@@ -161,5 +161,11 @@ class AuthService
             return $this->generateJWT($client);
         }
         return false;
+    }
+
+    public function getClientFromJWT(string $token): array
+    {
+        $parsed = $this->validateToken($token);
+        return [];
     }
 }

@@ -14,7 +14,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ProductRepository extends FullEntityRepository
 {
-    const LIMIT = 10;
+    const CURSOR_PAGINATION_LIMIT = 10;
 
     public function __construct(ManagerRegistry $registry)
     {

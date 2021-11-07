@@ -17,7 +17,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
     public function __construct(
         string $env
     ) {
-        $this->dev = $env === "dev";
+        $this->dev = $env === 'dev';
     }
 
     public function onKernelException(ExceptionEvent $event)
@@ -31,10 +31,10 @@ class ExceptionSubscriber implements EventSubscriberInterface
             ];
             if ($this->dev) {
                 $json += [
-                    "stackTrace" => [
-                        "message" => $message,
-                        "file" => $throwable->getFile(),
-                        "line" => $throwable->getLine(),
+                    'stackTrace' => [
+                        'message' => $message,
+                        'file' => $throwable->getFile(),
+                        'line' => $throwable->getLine(),
                     ]
                 ];
             }
@@ -48,9 +48,23 @@ class ExceptionSubscriber implements EventSubscriberInterface
         $getStatusCode = self::STATUS_CODE;
         $code = $throwable->$getStatusCode();
 
+        $error_type = 'undefined_error_type';
+        switch ($code) {
+            case 403:
+                $error_type = 'auth';
+                break;
+            case 404:
+                $error_type = 'routing';
+                break;
+        }
+
         $content = [
-            "message" => $message,
-            "code" => $code
+            'errors' => [
+                $error_type => [
+                    'error' => $message,
+                ]
+            ],
+            'code' => $code
         ];
 
         $res = new JsonResponse($content, $code);

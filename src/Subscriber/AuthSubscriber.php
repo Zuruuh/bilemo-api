@@ -15,11 +15,13 @@ class AuthSubscriber implements EventSubscriberInterface
     private AuthService $auth_service;
     private bool $dev;
 
+    const AUTH_UID = AuthService::AUTH_UID;
+
     public function __construct(
         AuthService $auth_service,
         string $env
     ) {
-        $this->dev = $env === "dev";
+        $this->dev = $env === 'dev';
         $this->auth_service = $auth_service;
     }
 
@@ -46,10 +48,18 @@ class AuthSubscriber implements EventSubscriberInterface
 
             if (
                 !isset($authorization[0]) ||
-                (bool) !$this->auth_service->validateToken($authorization[0], true)
+                (bool) !($client = $this->auth_service->validateToken($authorization[0], true))
             ) {
                 throw new AccessDeniedHttpException(AuthService::INVALID_TOKEN);
             }
+
+            $requestClosure = function () use ($client, $content) {
+                $json = gettype($content) === 'string' ? json_decode($content, true) : $content;
+                $json[AuthSubscriber::AUTH_UID] = $client['username'];
+                $this->content = $json;
+                return $this;
+            };
+            $request = $requestClosure->call($request);
         }
     }
 

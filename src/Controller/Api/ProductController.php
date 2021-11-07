@@ -26,7 +26,7 @@ class ProductController extends AbstractController implements ProtectedRoute
     }
 
     #[Route('/{id}', methods: ['GET'])]
-    public function getOne($id): JsonResponse
+    public function getOne(mixed $id): JsonResponse
     {
         return $this->product_service->getProduct((int) $id);
     }
