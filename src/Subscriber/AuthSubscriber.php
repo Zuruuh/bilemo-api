@@ -56,7 +56,7 @@ class AuthSubscriber implements EventSubscriberInterface
             $requestClosure = function () use ($client, $content) {
                 $json = gettype($content) === 'string' ? json_decode($content, true) : $content;
                 $json[AuthSubscriber::AUTH_UID] = $client['username'];
-                $this->content =  $json;
+                $this->content = $json;
                 return $this;
             };
             $request = $requestClosure->call($request);
