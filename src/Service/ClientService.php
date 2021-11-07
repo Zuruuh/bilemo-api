@@ -4,6 +4,8 @@ namespace App\Service;
 
 use App\Entity\Client;
 use App\Repository\ClientRepository;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class ClientService
@@ -55,5 +57,21 @@ class ClientService
     public function isPasswordValid(Client $client, string $password): bool
     {
         return $this->hasher->isPasswordValid($client, $password);
+    }
+
+    /**
+     * Returns a client's details
+     * 
+     * @param Request $request The controller request
+     * 
+     * @return JsonResponse The http response containing the user's details
+     */
+    public function getUserDetails(Request $request): JsonResponse
+    {
+        $username = $request->getContent()['_auth'];
+        $client = $this->client_repo->findOneByWithArray(['username' => $username])[0];
+        unset($client['password']);
+
+        return new JsonResponse(['client' => $client]);
     }
 }
