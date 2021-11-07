@@ -56,6 +56,15 @@ class ProductService
         return new JsonResponse($product);
     }
 
+    /**
+     * Checks if a product exists & return it
+     * 
+     * @param int $id The product's id
+     * 
+     * @throws NotFoundHttpException if product does not exist
+     * 
+     * @return array $product The searched product
+     */
     private function exists(int $id): array
     {
         $product = $this->product_repo->findOneByWithArray(['id' => $id]);
