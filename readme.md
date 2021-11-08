@@ -2,6 +2,7 @@
 
 [![Code Climate](https://api.codeclimate.com/v1/badges/1e36667fe5b8bb985332/maintainability)](https://codeclimate.com/github/Zuruuh/bilemo-api/maintainability)
 [![Codacy](https://app.codacy.com/project/badge/Grade/4959d3714c074cef9139d6a2876a1873)](https://www.codacy.com/gh/Zuruuh/bilemo-api/dashboard)
+
 <p align="center">BileMo is a B2B networking platform service which provides phone retailers an access to their rich catalog</p>
 
 ## Installation
@@ -33,6 +34,9 @@ $ make
 ```
 
 Once all the docker containers are up and running, just head to https://app.bilemo to see the project.
+
+## Usage
+
 ### Authentication
 
 While running the project locally, you can login using the test admin account.   
@@ -60,3 +64,7 @@ When making an api call with a valid jwt, the server will always return a new to
 Be careful, since the server will not return a new token if:   
 - An uncatched error is thrown (Server will return a 500 http code).
 - The token in your request was invalid.
+
+### Docs
+
+If you need informations about a specific route or entity, you can take a look at [the docs](./docs/app.md).
