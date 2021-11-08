@@ -15,7 +15,7 @@ Client entity schema:
 ## Routes
 
 ![](https://img.shields.io/badge/-GET-brightgreen)  
-Route: **/api/client**   
+Route: **/api/clients/me**   
 <table>
   <thead>
     <tr>
