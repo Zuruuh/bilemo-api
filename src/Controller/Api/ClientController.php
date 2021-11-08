@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/client')]
+#[Route('/api/clients')]
 class ClientController extends AbstractController implements ProtectedRoute
 {
     private ClientService $client_service;
@@ -19,7 +19,7 @@ class ClientController extends AbstractController implements ProtectedRoute
         $this->client_service = $client_service;
     }
 
-    #[Route('/', methods: ['GET'])]
+    #[Route('/me', methods: ['GET'])]
     public function me(Request $request): JsonResponse
     {
         return $this->client_service->getUserDetails($request);
