@@ -34,7 +34,7 @@
 Documentation is separated between multiple files to make it easier for you to navigate through it.
 Routes will always be annotated with their HTTP Method using a badge.
 
-### [Api Responses](./responses.md)
+### [Api Responses](./response.md)
 ### [Authentication](./auth.md)
 <br>
 
