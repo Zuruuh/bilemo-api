@@ -51,7 +51,7 @@ Route: **/api/login**
 While running the project locally, you can login using the test admin account.   
 You can get your JsonWebToken by running the following request (example using cURL).   
 ```bash
-$ curl --location --insecure --request POST 'https://app.bilemo/api/login' \
+curl --location --insecure --request POST 'https://app.bilemo/api/login' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "username": "admin",
@@ -64,8 +64,9 @@ The token will always be in the "token" property of the response's json object.
 To use the token, add an "Authorization" header to your request, and set it's value to be "Bearer \<your-token\>".   
 Here is another example request using cURL showing how to use the authorization header.
 ```bash
-$ curl --location --insecure --request GET 'https://app.bilemo/api/client' \
+curl --location --insecure --request GET 'https://app.bilemo/api/client' \
 --header 'Content-Type: application/json' \
+# replace here the <JsonWebToken> with your actual token
 --header 'Authorization: Bearer <JsonWebToken>'
 ```
 

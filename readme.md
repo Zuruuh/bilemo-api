@@ -9,32 +9,31 @@
 
 ### Requirements
 
-To run the project, you will need Docker (and Docker-Compose), and Make installed on your computer.   
+To run the project, you will need Docker, docker-compose, and make installed on your computer.   
 To check if you meet the requirements, run the following commands:  
 ```bash
-$ docker -v
-$ docker-compose -v
-$ make -v
+docker -v
+docker-compose -v
+make -v
 ```
+If these 3 softwares are installed properly, you don't have to worry about any other php or postgres dependencies, as everything will be managed in docker containers. (Having php, composer, symfony cli, etc... installed on your computer will help to write commands faster, but is completely optionnal).  
 
 ### Running the project
 
 To run the project locally, just run the following command:
 ```bash
-$ make install
+make install
 ```
 
 If you need help or don't know which make commands can be used, just run:
 ```bash
-$ make help
-```
-Or even simpler:
-```bash
-$ make
+make help
+# or
+make
 ```
 
 Once all the docker containers are up and running, just head to https://app.bilemo to see the project.
 
 ## Usage
 
-If you need informations about a specific route or entity, you can take a look at [the docs](./docs/app.md).
+If you need informations about a specific route or entity, you can take a look at [the docs](./docs/app.md), or hit the /api/docs api endpoint.
