@@ -10,6 +10,15 @@ class ApiService
 {
     const INVALID_REQ = "Invalid request, you need to specify a '%s' property";
 
+    /**
+     * Returns an object depending on the form validation.
+     * 
+     * @param FormInterface $form    The form to validate
+     * @param array         $content The content to submit to the form
+     * @param ?bool         $edit    Is the form a creation or an edition
+     * 
+     * @return object The content to return to the user.
+     */
     public function form(FormInterface $form, array $content, bool $edit = false): object
     {
         $form_content = $content;
@@ -50,6 +59,15 @@ class ApiService
         ];
     }
 
+    /**
+     * Creates an error on a forminterface
+     * 
+     * @param string        $field   The field to create an error on
+     * @param string        $message The error message
+     * @param FormInterface $form    The form to create the error on
+     * 
+     * @return void
+     */
     public function generateError(string $field, string $message, FormInterface $form): void
     {
         $form->get($field)->addError(
