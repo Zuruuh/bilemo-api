@@ -2,11 +2,12 @@
 
 ## Shape
 
-When requesting the server, the response will always be shaped with the following properties:
-- **errors**: The errors (if there are any).
-- **code**: The http response code.
-- **message**: The status of the action.
-- **token**: A new JWT that can be used so you don't have to re-create one yourself.
+When requesting the server, the response will always be shaped with the following properties:  
+
+* **errors**: The errors (if there are any).  
+* **code**: The http response code.  
+* **message**: The status of the action.  
+* **token**: A new JWT that can be used so you don't have to re-create one yourself.  
 
 ### Errors
 
