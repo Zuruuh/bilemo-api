@@ -67,10 +67,13 @@ class UserService
         $usersArray = [];
         foreach ($users as $user) {
             ++$entity_cursor;
-            $entity = $user;
-            $entity['cursor'] = $entity_cursor;
-            $entity['links'] = ['entity' => $this->router->generate('app_api_user_getone', ['id' => $entity['id']])];
-            $usersArray[] = $entity;
+            $entity = (array) $user;
+
+            $usersArray[] = [
+                ...$entity,
+                '_links' => $this->generateLinks($user['id']),
+                'cursor' => $entity_cursor
+            ];
         }
 
         return new JsonResponse(
@@ -92,6 +95,7 @@ class UserService
         $client = $this->client_service->getClientFromUsername($request->getContent()[AuthService::AUTH_UID]);
         $user = $this->exists($id);
         $this->checkOwner($user, $client);
+        $user['_links'] = $this->generateLinks($user['id']);
 
         return new JsonResponse(['user' => $user]);
     }
@@ -162,9 +166,12 @@ class UserService
         if (!$valid->valid) {
             return $valid->response;
         }
+        $user['_links'] = $this->generateLinks($user['id']);
+
         return new JsonResponse(
             [
                 'message' => sprintf(self::USER_CREATE_SUCCESS, $user['name'], $user['id']),
+                'user' => $user,
                 'code' => 201
             ],
             201
@@ -177,9 +184,9 @@ class UserService
      * @param FormInterface The user form
      * @param array         $content The request content
      * 
-     * @return User
+     * @return array
      */
-    private function save(FormInterface $form, array $content)
+    private function save(FormInterface $form, array $content): array
     {
         $user = $form->getData();
         $user->setClient(
@@ -188,7 +195,7 @@ class UserService
         $this->em->persist($user);
         $this->em->flush();
 
-        return $this->user_repo->findOneByWithArray(['id' => $user->getId()])[0];
+        return (array) $this->user_repo->findOneByWithArray(['id' => $user->getId()])[0];
     }
 
     /**
@@ -203,7 +210,7 @@ class UserService
     public function edit(Request $request, FormInterface $form_interface, int $id): JsonResponse
     {
         $content = (array) $request->getContent();
-        $form = $this->api_service->form($form_interface, $content);
+        $form = $this->api_service->form($form_interface, $content, true);
 
         if (!$form->valid) {
             return $form->response ?? new JsonResponse();
@@ -221,25 +228,28 @@ class UserService
         $this->em->flush();
 
         $user_id = $user->getId();
+        $user_as_array = $this->user_repo->findOneByWithArray(['id' => $user_id])[0];
+        $user_as_array['_links'] = $this->generateLinks($user_id);
 
         return new JsonResponse(
             [
                 'message' => sprintf(self::USER_EDIT_SUCCESS, $user->getName(), $user_id),
-                'user' => [
-                    $this->user_repo->findOneByWithArray(['id' => $user_id])[0],
-                    'links' => [
-                        'entity' => $this->router->generate(
-                            'app_api_user_getone',
-                            ['id' => $user_id],
-                        )
-                    ]
-                ],
+                'user' => $user_as_array,
                 'code' => 200
             ],
             200
         );
     }
 
+    /**
+     * Updates a user in database
+     * 
+     * @param FormInterface $form    The user form
+     * @param array         $content The submitted content
+     * @param int           $id      The updated user's id
+     * 
+     * @return User
+     */
     private function update(FormInterface $form, array $content, int $id): User
     {
         $user = $this->exists($id, false);
@@ -248,11 +258,14 @@ class UserService
         );
         $this->checkOwner($user, $client);
 
-        $updated_user = $this->updateProperties($user, $form->getData());
+        // $updated_user = $this->updateProperties($user, $form->getData());
 
-        return $updated_user;
+        return $user;
     }
 
+    /**
+     * Updates a user properties
+     */
     private function updateProperties(User $user, User $new_data): User
     {
         foreach (User::PROPERTIES as $property) {
@@ -291,6 +304,13 @@ class UserService
         return new Response('', 204);
     }
 
+    /**
+     * Generate Hateoas links for users
+     * 
+     * @param int $id The user id
+     * 
+     * @return array The generated links
+     */
     private function generateLinks(int $id): array
     {
         $param = ['id' => $id];
@@ -300,26 +320,24 @@ class UserService
         $delete_link = $this->router->generate('app_api_user_delete', $param);
 
         return [
-            '_links' => [
-                'get' => [
-                    'methods' => [
-                        'GET',
-                    ],
-                    'route' => $get_link
+            'get' => [
+                'methods' => [
+                    'GET',
                 ],
-                'edit' => [
-                    'methods' => [
-                        'PUT',
-                        'PATCH'
-                    ],
-                    'route' => $edit_link
+                'route' => $get_link
+            ],
+            'edit' => [
+                'methods' => [
+                    'PUT',
+                    'PATCH'
                 ],
-                'delete' => [
-                    'methods' => [
-                        'DELETE'
-                    ],
-                    'route' => $delete_link
-                ]
+                'route' => $edit_link
+            ],
+            'delete' => [
+                'methods' => [
+                    'DELETE'
+                ],
+                'route' => $delete_link
             ]
         ];
     }
