@@ -162,10 +162,4 @@ class AuthService
         }
         return false;
     }
-
-    public function getClientFromJWT(string $token): array
-    {
-        $parsed = $this->validateToken($token);
-        return [];
-    }
 }
