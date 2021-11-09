@@ -16,9 +16,11 @@ class ProductService
     private RouterInterface   $router;
 
     public function __construct(
-        ProductRepository $product_repo
+        ProductRepository $product_repo,
+        RouterInterface $router
     ) {
         $this->product_repo = $product_repo;
+        $this->router = $router;
     }
 
     /**
@@ -34,26 +36,17 @@ class ProductService
         $cursor = $request->query->getInt("cursor");
         $cursor = min($cursor, $total);
 
-        $products = $this->product_repo->findByCursor($cursor);
+        $products_array = $this->product_repo->findByCursor($cursor);
 
-        foreach ($products as $product) {
-            $product['_links'] = [
-                'get' => [
-                    'methods' => [
-                        'GET'
-                    ],
-                    'route' => $this->router->generate(
-                        'app_api_user_getone',
-                        ['id' => $product['id']],
-                    )
-                ]
-            ];
-        }
+        $products = array_map(function ($product) {
+            $entity = $product;
+            $entity['_links'] = $this->generateLinks($product['id']);
+
+            return $entity;
+        }, $products_array);
 
         return new JsonResponse(
-            [
-                "products" => $products
-            ],
+            ["products" => $products],
             empty($products) ? 404 : 200 // 302: Found ?
         );
     }
@@ -68,6 +61,7 @@ class ProductService
     public function getProduct(int $id): JsonResponse
     {
         $product = $this->exists($id);
+        $product['_links'] = $this->generateLinks($id);
 
         return new JsonResponse($product);
     }
@@ -87,6 +81,29 @@ class ProductService
         if (empty($product)) {
             throw new NotFoundHttpException(self::HTTP_NOT_FOUND);
         }
-        return ['product' => $product[0]];
+
+        return (array) $product[0];
+    }
+
+    /**
+     * Generates the Hateoas entity links
+     * 
+     * @param int $id The product's id
+     * 
+     * @return array The product's links
+     */
+    private function generateLinks(int $id): array
+    {
+        return [
+            'get' => [
+                'methods' => [
+                    'GET'
+                ],
+                'route' => $this->router->generate(
+                    'app_api_user_getone',
+                    ['id' => $id],
+                )
+            ]
+        ];
     }
 }
