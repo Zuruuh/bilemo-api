@@ -39,7 +39,7 @@ class AuthTest extends KernelTestCase
 
         $me_response = $client->request(
             'GET',
-            '/api/client',
+            '/api/clients/me',
             [
                 'headers' => [
                     'Authorization' => "Bearer $token"

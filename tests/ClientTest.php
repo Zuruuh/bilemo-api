@@ -5,7 +5,6 @@ namespace App\Tests;
 use App\Entity\Client;
 use App\Service\ClientService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ClientTest extends KernelTestCase
 {
