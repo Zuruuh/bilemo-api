@@ -21,6 +21,13 @@ class DocsService
         $this->router = $router;
     }
 
+    /**
+     * Returns the content of a Markdown file as an html document
+     * 
+     * @param string $filename The documentation file to get
+     * 
+     * @return Response The http response returned to the user
+     */
     public function getHtmlContent(string $filename): Response
     {
         $path = $this->getRealPath($filename);
@@ -32,11 +39,26 @@ class DocsService
         return new Response($this->replaceLinks($markdown), 200);
     }
 
+    /**
+     * Returns the path towards a file.
+     * 
+     * @param string $filename The name of the searched file
+     * 
+     * @return string The real path to a markdown file.
+     */
     private function getRealPath(string $filename): string
     {
         return realpath(sprintf('%s/../%s/%s.%s', getcwd(), self::DOCS_DIR, $filename, self::FILE_EXTENSION));
     }
 
+    /**
+     * Checks if a file exists & is valid
+     * 
+     * @param string $path     The full path to a file
+     * @param string $filename The name of the file to check
+     * 
+     * @return void
+     */
     private function fileIsValid(string $path, string $filename): void
     {
         if (!file_exists($path)) {
@@ -47,6 +69,13 @@ class DocsService
         }
     }
 
+    /**
+     * Replaces all the relatives links in an html document with absolute routes
+     * 
+     * @param string $content The html document
+     * 
+     * @return string The formatted html document
+     */
     private function replaceLinks(string $content): string
     {
         $base_route = $this->router->generate('app_api_app_doc');
