@@ -124,6 +124,9 @@
             "config/packages/lexik_jwt_authentication.yaml"
         ]
     },
+    "michelf/php-markdown": {
+        "version": "1.9.0"
+    },
     "myclabs/deep-copy": {
         "version": "1.10.2"
     },
