@@ -6,12 +6,14 @@ use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\RouterInterface;
 
 class ProductService
 {
     const HTTP_NOT_FOUND = 'This product does not exists !';
 
     private ProductRepository $product_repo;
+    private RouterInterface   $router;
 
     public function __construct(
         ProductRepository $product_repo
@@ -33,6 +35,20 @@ class ProductService
         $cursor = min($cursor, $total);
 
         $products = $this->product_repo->findByCursor($cursor);
+
+        foreach ($products as $product) {
+            $product['_links'] = [
+                'get' => [
+                    'methods' => [
+                        'GET'
+                    ],
+                    'route' => $this->router->generate(
+                        'app_api_user_getone',
+                        ['id' => $product['id']],
+                    )
+                ]
+            ];
+        }
 
         return new JsonResponse(
             [

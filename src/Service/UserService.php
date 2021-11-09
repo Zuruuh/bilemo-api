@@ -12,20 +12,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\RouterInterface;
 
 class UserService
 {
-    private UserRepository $user_repo;
-    private AuthService $auth_service;
-    private ApiService $api_service;
-    private ClientService $client_service;
+    private UserRepository         $user_repo;
+    private AuthService            $auth_service;
+    private ApiService             $api_service;
+    private ClientService          $client_service;
     private EntityManagerInterface $em;
+    private RouterInterface        $router;
 
     const USER_DOES_NOT_EXIST = 'There are no user with the id %s';
     const USER_CREATE_SUCCESS = 'User "%s" with id #%s has been successfully created !';
-    const NOT_YOUR_USER = 'You are not the owner of this user';
-    const USER_DELETE_SUCCESS = 'The user "%s" has been successfully deleted !';
-    const USER_EDIT_SUCCESS = 'User "%s" with id #%s has been successfully updated !';
+    const NOT_YOUR_USER =       'You are not the owner of this user';
+    const USER_EDIT_SUCCESS =   'User "%s" with id #%s has been successfully updated !';
 
     public function __construct(
         UserRepository $user_repo,
@@ -33,12 +34,14 @@ class UserService
         ApiService $api_service,
         ClientService $client_service,
         EntityManagerInterface $em,
+        RouterInterface $router,
     ) {
         $this->user_repo = $user_repo;
         $this->auth_service = $auth_service;
         $this->api_service = $api_service;
         $this->client_service = $client_service;
         $this->em = $em;
+        $this->router = $router;
     }
 
     /**
@@ -66,6 +69,7 @@ class UserService
             ++$entity_cursor;
             $entity = $user;
             $entity['cursor'] = $entity_cursor;
+            $entity['links'] = ['entity' => $this->router->generate('app_api_user_getone', ['id' => $entity['id']])];
             $usersArray[] = $entity;
         }
 
@@ -216,9 +220,20 @@ class UserService
         $this->em->persist($user);
         $this->em->flush();
 
+        $user_id = $user->getId();
+
         return new JsonResponse(
             [
-                'message' => sprintf(self::USER_EDIT_SUCCESS, $user->getName(), $user->getId()),
+                'message' => sprintf(self::USER_EDIT_SUCCESS, $user->getName(), $user_id),
+                'user' => [
+                    $this->user_repo->findOneByWithArray(['id' => $user_id])[0],
+                    'links' => [
+                        'entity' => $this->router->generate(
+                            'app_api_user_getone',
+                            ['id' => $user_id],
+                        )
+                    ]
+                ],
                 'code' => 200
             ],
             200
@@ -274,5 +289,38 @@ class UserService
         $this->em->flush();
 
         return new Response('', 204);
+    }
+
+    private function generateLinks(int $id): array
+    {
+        $param = ['id' => $id];
+
+        $get_link = $this->router->generate('app_api_user_getone', $param);
+        $edit_link = $this->router->generate('app_api_user_edit', $param);
+        $delete_link = $this->router->generate('app_api_user_delete', $param);
+
+        return [
+            '_links' => [
+                'get' => [
+                    'methods' => [
+                        'GET',
+                    ],
+                    'route' => $get_link
+                ],
+                'edit' => [
+                    'methods' => [
+                        'PUT',
+                        'PATCH'
+                    ],
+                    'route' => $edit_link
+                ],
+                'delete' => [
+                    'methods' => [
+                        'DELETE'
+                    ],
+                    'route' => $delete_link
+                ]
+            ]
+        ];
     }
 }
