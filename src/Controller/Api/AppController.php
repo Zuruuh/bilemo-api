@@ -23,13 +23,13 @@ class AppController extends AbstractController
     public function index(): JsonResponse
     {
         return new JsonResponse([
-            'message' => 'Welcome to Bilemo Api. If you need any help getting started, you can request the /api/docs/app endpoint for more informations !'
+            'message' => 'Welcome to Bilemo Api. If you need any help getting started, you can request the /api/docs endpoint for more informations !'
         ], 200);
     }
 
     #[Route('/docs/{doc}', methods: ['GET'])]
-    public function doc(mixed $doc): Response
+    public function doc(mixed $doc = ''): Response
     {
-        return $this->docs_service->getHtmlContent((string) $doc);
+        return $this->docs_service->getHtmlContent($doc === '' ? 'app' : (string) $doc);
     }
 }
