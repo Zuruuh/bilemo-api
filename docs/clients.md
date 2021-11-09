@@ -3,14 +3,14 @@
 ## Entity
 
 Client entity schema:
-```ts
+<pre>
 {
   "id": int,
   "username": string,
   "roles": string[],
   "email": string
 }
-```
+</pre>
 
 ## Routes
 
@@ -39,9 +39,10 @@ Route: **/api/clients/me**
     <tr>
       <td>Output</td>
       <td>
-      {
-       client: Client
-      }
+      <pre>
+{
+  client: Client
+}</pre>
       </td>
     </tr>
   </tbody>

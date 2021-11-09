@@ -11,7 +11,7 @@ When requesting the server, the response will always be shaped with the followin
 ### Errors
 
 An errors object will always be shaped like the following:  
-```json
+<pre>
 {
   "errors": {
     "field": {
@@ -21,8 +21,7 @@ An errors object will always be shaped like the following:
         "error": "This value is invalid !"
     }
   },
-}
-```
+}</pre>
 
 If your request is correct, there should be no errors object in your response.   
 

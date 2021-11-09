@@ -3,14 +3,13 @@
 ## Entity
 
 User entity schema:
-```ts
+<pre>
 {
     "id": int,
     "client": Client,
     "name": string,
     "balance": int,
-}
-```
+}</pre>
 
 The client property represents the client who owns the account (OneToMany), which means only the owner of an user should be able to manage it.
 
@@ -47,12 +46,13 @@ Route: **/api/users**
         <tr>
             <td>Output</td>
             <td>
-            {
-             users: [
-                 User, 
-                 "cursor": int
-                ]
-            }
+            <pre>
+{
+    users: [
+        User, 
+        "cursor": int
+    ]
+}</pre>
             </td>
         </tr>
     </tbody>
@@ -89,9 +89,10 @@ Route: **/api/users/{id}**
         <tr>
             <td>Output</td>
             <td>
-            {
-             user: User
-            }
+            <pre>
+{
+  user: User
+}</pre>
             </td>
         </tr>
     </tbody>
@@ -122,10 +123,11 @@ Route: **/api/users/create**
         <tr>
             <td>Body</td>
             <td>
-            {
-                "name": string,
-                "balance"?: int
-            }
+            <pre>
+{
+  "name": string,
+  "balance"?: int
+}</pre>
             </td>
         </tr>
     </tbody>
@@ -193,10 +195,11 @@ Route: **/api/users/edit/{id}**
         <tr>
             <td>Body</td>
             <td>
-            {
-                "name"?: string,
-                "balance"?: int
-            }
+            <pre>
+{
+  "name"?: string,
+  "balance"?: int
+}</pre>
             </td>
         </tr>
     </tbody>

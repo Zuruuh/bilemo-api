@@ -3,7 +3,7 @@
 ## Entity
 
 Product entity schema:
-```ts
+<pre>
 {
     "id": int,
     "name": string,
@@ -14,8 +14,7 @@ Product entity schema:
     "storage": int,
     "createdAt": Datetime,
     "lastUpdate": Datetime
-}
-```
+}</pre>
 
 ## Routes
 
@@ -50,9 +49,10 @@ Route: **/api/products**
         <tr>
             <td>Output</td>
             <td>
-            {
-             products: Product[]
-            }
+            <pre>
+{
+  products: Product[]
+}</pre>
             </td>
         </tr>
     </tbody>
@@ -89,9 +89,10 @@ Route: **/api/products/{id}**
         <tr>
             <td>Output</td>
             <td>
-            {
-             product: Product
-            }
+            <pre>
+{
+  product: Product
+}</pre>
             </td>
         </tr>
     </tbody>
