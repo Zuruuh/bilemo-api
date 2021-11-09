@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\UserService;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Route('/api/users')]
 class UserController extends AbstractController implements ProtectedRoute
@@ -50,7 +51,7 @@ class UserController extends AbstractController implements ProtectedRoute
     }
 
     #[Route('/delete/{id}', methods: 'DELETE')]
-    public function delete(Request $request, mixed $id): JsonResponse
+    public function delete(Request $request, mixed $id): Response
     {
         return $this->user_service->delete($request, (int) $id);
     }

@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -254,14 +255,14 @@ class UserService
     }
 
     /**
-     * Deletes a user from database
+     * Deletes a user from database.
      * 
      * @param Request $request The controller request
      * @param int     $id      The user id
      * 
-     * @return JsonResponse The json containing either an error or a success message
+     * @return Response The empty response.
      */
-    public function delete(Request $request, int $id): JsonResponse
+    public function delete(Request $request, int $id): Response
     {
         $user = $this->exists($id, false);
         $client = $this->client_service->getClientFromUsername(
@@ -272,8 +273,6 @@ class UserService
         $this->em->remove($user);
         $this->em->flush();
 
-        return new JsonResponse([
-            'message' => sprintf(self::USER_DELETE_SUCCESS, $user->getName())
-        ]);
+        return new Response('', 204);
     }
 }
