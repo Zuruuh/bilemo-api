@@ -22,19 +22,19 @@ class ClientService
     }
 
     /**
-     * Returns a Client from it's username
+     * Returns a Client from it's username.
      * 
-     * @param string $username The client to find's username 
+     * @param string $username The client to find's username
      * 
      * @return Client|null
      */
     public function getClientFromUsername(string $username): Client|null
     {
-        return $this->client_repo->findOneBy(["username" => $username]);
+        return $this->client_repo->findOneBy(['username' => $username]);
     }
 
     /**
-     * Hashes a password using Symfony's UserPasswordHasher
+     * Hashes a password using Symfony's UserPasswordHasher.
      * 
      * @param Client $client   The client who's password is being hashed
      * @param string $password The client's plain password
@@ -47,7 +47,7 @@ class ClientService
     }
 
     /**
-     * Verifies a password using Symfony's UserPasswordHasher
+     * Verifies a password using Symfony's UserPasswordHasher.
      * 
      * @param Client $client   The client who's password is being verified
      * @param string $password The client's plain password
@@ -60,7 +60,7 @@ class ClientService
     }
 
     /**
-     * Returns a client's details
+     * Returns a client's details.
      * 
      * @param Request $request The controller request
      * 

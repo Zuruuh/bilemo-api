@@ -15,7 +15,7 @@ class AuthSubscriber implements EventSubscriberInterface
     private AuthService $auth_service;
     private bool $dev;
 
-    const AUTH_UID = AuthService::AUTH_UID;
+    public const AUTH_UID = AuthService::AUTH_UID;
 
     public function __construct(
         AuthService $auth_service,
@@ -90,9 +90,10 @@ class AuthSubscriber implements EventSubscriberInterface
         if (!$jwt) {
             return;
         }
-        $content += ['token' => $jwt];
 
+        $content += ['token' => $jwt];
         $response->setContent(json_encode($content));
+
         return $response;
     }
 
@@ -100,7 +101,7 @@ class AuthSubscriber implements EventSubscriberInterface
     {
         return [
             KernelEvents::CONTROLLER => 'onKernelController',
-            KernelEvents::RESPONSE   => 'onKernelResponse'
+            KernelEvents::RESPONSE => 'onKernelResponse'
         ];
     }
 }

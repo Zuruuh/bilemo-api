@@ -10,7 +10,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 class ProductService
 {
-    const HTTP_NOT_FOUND = 'This product does not exists !';
+    public const HTTP_NOT_FOUND = 'This product does not exists !';
 
     private ProductRepository $product_repo;
     private RouterInterface   $router;
@@ -33,7 +33,7 @@ class ProductService
     public function getPaginatedProducts(Request $request): JsonResponse
     {
         $total = $this->product_repo->count([]);
-        $cursor = $request->query->getInt("cursor");
+        $cursor = $request->query->getInt('cursor');
         $cursor = min($cursor, $total);
 
         $products_array = $this->product_repo->findByCursor($cursor);
@@ -46,13 +46,13 @@ class ProductService
         }, $products_array);
 
         return new JsonResponse(
-            ["products" => $products],
+            ['products' => $products],
             empty($products) ? 404 : 200 // 302: Found ?
         );
     }
 
     /**
-     * Returns a specific product in a json object
+     * Returns a specific product in a json object.
      * 
      * @param int $id The passed in id
      * 
@@ -67,7 +67,7 @@ class ProductService
     }
 
     /**
-     * Checks if a product exists & return it
+     * Checks if a product exists & return it.
      * 
      * @param int $id The product's id
      * 
@@ -86,7 +86,7 @@ class ProductService
     }
 
     /**
-     * Generates the Hateoas entity links
+     * Generates the Hateoas entity links.
      * 
      * @param int $id The product's id
      * 

@@ -2,8 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Product;
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -14,10 +12,10 @@ use Exception;
  */
 abstract class FullEntityRepository extends ServiceEntityRepository
 {
-    const CURSOR_PAGINATION_LIMIT = null;
-    const ENTITY = 'entity';
+    public const CURSOR_PAGINATION_LIMIT = null;
+    public const ENTITY = 'entity';
 
-    const INVALID_LIMIT = "Entity pagination limit is set to null. Did you create a 'CURSOR_PAGINATION_LIMIT' constant in your %s class ?";
+    public const INVALID_LIMIT = "Entity pagination limit is set to null. Did you create a 'CURSOR_PAGINATION_LIMIT' constant in your %s class ?";
 
     /**
      * Returns a set amount of the set entity based on passed cursor
@@ -83,6 +81,7 @@ abstract class FullEntityRepository extends ServiceEntityRepository
                 ->setParameter(":param$i", $param);
             ++$i;
         }
+
         return $qb;
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Product;
-use App\Repository\FullEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**

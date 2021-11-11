@@ -10,9 +10,9 @@ use Symfony\Component\Routing\RouterInterface;
 
 class DocsService
 {
-    const DOCS_DIR = 'docs';
-    const FILE_EXTENSION = 'md';
-    const DOC_DOES_NOT_EXIST = 'There are not documents with the name "%s"';
+    public const DOCS_DIR = 'docs';
+    public const FILE_EXTENSION = 'md';
+    public const DOC_DOES_NOT_EXIST = 'There are not documents with the name "%s"';
 
     private RouterInterface $router;
 
@@ -22,7 +22,7 @@ class DocsService
     }
 
     /**
-     * Returns the content of a Markdown file as an html document
+     * Returns the content of a Markdown file as an html document.
      * 
      * @param string $filename The documentation file to get
      * 
@@ -44,7 +44,7 @@ class DocsService
      * 
      * @param string $filename The name of the searched file
      * 
-     * @return string The real path to a markdown file.
+     * @return string The real path to a markdown file
      */
     private function getRealPath(string $filename): string
     {
@@ -52,7 +52,7 @@ class DocsService
     }
 
     /**
-     * Checks if a file exists & is valid
+     * Checks if a file exists & is valid.
      * 
      * @param string $path     The full path to a file
      * @param string $filename The name of the file to check
@@ -82,6 +82,7 @@ class DocsService
 
         $formatted = str_replace('.md', '', $content);
         $formatted = preg_replace('/<a href="\.(\/\S+)"/', '<a href="' . $base_route . '$1"', $formatted);
+
         return $formatted;
     }
 }

@@ -14,12 +14,12 @@ use Symfony\Component\Validator\Constraints\Type;
 
 class UserFormType extends AbstractType
 {
-    const NAME_MAX_LENGTH = 32;
-    const NAME_MISSING_MESSAGE = 'Your have to specify a name !';
-    const NAME_MAX_LENGTH_MESSAGE = 'User\'s name cannot be longer than ' . self::NAME_MAX_LENGTH . ' characters';
+    public const NAME_MAX_LENGTH = 32;
+    public const NAME_MISSING_MESSAGE = 'Your have to specify a name !';
+    public const NAME_MAX_LENGTH_MESSAGE = 'User\'s name cannot be longer than ' . self::NAME_MAX_LENGTH . ' characters';
 
-    const BALANCE_MISSING_MESSAGE = 'You have to specify a balance !';
-    const BALANCE_INVALID_MESSAGE = 'Balance ({{ value }}) must be a valid integer';
+    public const BALANCE_MISSING_MESSAGE = 'You have to specify a balance !';
+    public const BALANCE_INVALID_MESSAGE = 'Balance ({{ value }}) must be a valid integer';
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

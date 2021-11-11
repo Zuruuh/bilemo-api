@@ -2,14 +2,14 @@
 
 namespace App\Service;
 
-use stdClass;
 use App\Entity\Client;
-use Symfony\Component\HttpKernel\Exception;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use stdClass;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception;
 
 class AuthService
 {
@@ -17,12 +17,12 @@ class AuthService
     private ClientService $client_service;
     private ApiService $api_service;
 
-    const INVALID_USERNAME = 'There are no client with this username.';
-    const INVALID_CREDENTIALS = 'Invalid credentials. Make sure your password is correct.';
+    public const INVALID_USERNAME = 'There are no client with this username.';
+    public const INVALID_CREDENTIALS = 'Invalid credentials. Make sure your password is correct.';
 
-    const INVALID_TOKEN = 'This action needs a valid token!';
+    public const INVALID_TOKEN = 'This action needs a valid token!';
 
-    const AUTH_UID = '_auth';
+    public const AUTH_UID = '_auth';
 
     public function __construct(
         JWTTokenManagerInterface $jwt_manager,
@@ -68,7 +68,7 @@ class AuthService
     }
 
     /**
-     * Checks a client's credentials
+     * Checks a client's credentials.
      * 
      * @param Client $client   The client to check the credentials from
      * @param string $password The plain password given by user
@@ -82,12 +82,14 @@ class AuthService
         $client = $this->exists($content);
         if (!$client) {
             $this->api_service->generateError('username', self::INVALID_USERNAME, $form);
+
             return null;
         }
 
         $valid = $this->client_service->isPasswordValid($client, $content->password);
         if (!$valid) {
             $this->api_service->generateError('password', self::INVALID_CREDENTIALS, $form);
+
             return null;
         }
 
@@ -95,7 +97,7 @@ class AuthService
     }
 
     /**
-     * Checks if a user exists with a given username
+     * Checks if a user exists with a given username.
      * 
      * @param string $username The user to check
      * 
@@ -113,7 +115,7 @@ class AuthService
     }
 
     /**
-     * Generates a JsonWebToken
+     * Generates a JsonWebToken.
      * 
      * @param Client $client The client who requested the JWT
      * 
@@ -125,7 +127,7 @@ class AuthService
     }
 
     /**
-     * Validates a JsonWebToken
+     * Validates a JsonWebToken.
      * 
      * @param string $token     The token to validate
      * @param bool   ?$throwing Should an error be thrown ?
@@ -138,11 +140,13 @@ class AuthService
     {
         try {
             $client = $this->jwt_manager->parse(substr($token, 7));
+
             return $client;
         } catch (JWTDecodeFailureException $exception) {
             if ($throwing) {
                 throw new Exception\UnauthorizedHttpException('Bearer', self::INVALID_TOKEN);
             }
+
             return false;
         }
     }
@@ -160,6 +164,7 @@ class AuthService
         if ($client instanceof Client) {
             return $this->generateJWT($client);
         }
+
         return false;
     }
 }

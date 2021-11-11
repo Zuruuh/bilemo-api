@@ -12,7 +12,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
 
     private bool $dev;
 
-    const STATUS_CODE = 'getStatusCode';
+    public const STATUS_CODE = 'getStatusCode';
 
     public function __construct(
         string $env
@@ -42,6 +42,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
             $event->setResponse(
                 new JsonResponse($json, 500)
             );
+
             return;
         }
 

@@ -23,10 +23,10 @@ class UserService
     private EntityManagerInterface $em;
     private RouterInterface        $router;
 
-    const USER_DOES_NOT_EXIST = 'There are no user with the id %s';
-    const USER_CREATE_SUCCESS = 'User "%s" with id #%s has been successfully created !';
-    const NOT_YOUR_USER =       'You are not the owner of this user';
-    const USER_EDIT_SUCCESS =   'User "%s" with id #%s has been successfully updated !';
+    public const USER_DOES_NOT_EXIST = 'There are no user with the id %s';
+    public const USER_CREATE_SUCCESS = 'User "%s" with id #%s has been successfully created !';
+    public const NOT_YOUR_USER = 'You are not the owner of this user';
+    public const USER_EDIT_SUCCESS = 'User "%s" with id #%s has been successfully updated !';
 
     public function __construct(
         UserRepository $user_repo,
@@ -45,7 +45,7 @@ class UserService
     }
 
     /**
-     * Returns paginated users in a json object
+     * Returns paginated users in a json object.
      * 
      * @param Request $request The controller request
      * 
@@ -83,7 +83,7 @@ class UserService
     }
 
     /**
-     * Returns a specific user
+     * Returns a specific user.
      * 
      * @param Request $request The controller request
      * @param int     $id      The requsted user's id
@@ -101,9 +101,9 @@ class UserService
     }
 
     /**
-     * Returns a user if it exists & throws an error if it doesn't
+     * Returns a user if it exists & throws an error if it doesn't.
      * 
-     * @param int  $id    The user id 
+     * @param int  $id    The user id
      * @param bool $array Should the method return an entity or an array
      * 
      * @throws NotFoundHttpException If there are no users with this id
@@ -118,14 +118,15 @@ class UserService
         if (!$user) {
             throw new NotFoundHttpException(sprintf(self::USER_DOES_NOT_EXIST, $id));
         }
+
         return $array ? (array) $user[0] : $user;
     }
 
     /**
-     * Verifies that the requested User belongs to the requesting Client
+     * Verifies that the requested User belongs to the requesting Client.
      * 
-     * @param User|array  $user_infos The user or user infos array
-     * @param Client      $client     The client requesting the user
+     * @param User|array $user_infos The user or user infos array
+     * @param Client     $client     The client requesting the user
      * 
      * @throws AccessDeniedHttpException If user does not belong to client
      * 
@@ -144,7 +145,7 @@ class UserService
     }
 
     /**
-     *  Creates a user & returns the operation status
+     *  Creates a user & returns the operation status.
      * 
      * @param Request       $request        The controller request
      * @param FormInterface $form_interface The user form
@@ -179,7 +180,7 @@ class UserService
     }
 
     /**
-     * Saves a user to database
+     * Saves a user to database.
      * 
      * @param FormInterface The user form
      * @param array         $content The request content
@@ -199,7 +200,7 @@ class UserService
     }
 
     /**
-     *  Edits a user & returns the operation status
+     *  Edits a user & returns the operation status.
      * 
      * @param Request       $request        The controller request
      * @param FormInterface $form_interface The user form
@@ -216,13 +217,12 @@ class UserService
             return $form->response ?? new JsonResponse();
         }
 
-        $user = $this->update($form_interface, $content, $id);
+        $user = $this->update($content, $id);
 
         $valid = $this->api_service->form($form_interface, $content);
         if (!$valid->valid) {
             return $valid->response;
         }
-
 
         $this->em->persist($user);
         $this->em->flush();
@@ -242,7 +242,7 @@ class UserService
     }
 
     /**
-     * Updates a user in database
+     * Updates a user in database.
      * 
      * @param FormInterface $form    The user form
      * @param array         $content The submitted content
@@ -250,34 +250,13 @@ class UserService
      * 
      * @return User
      */
-    private function update(FormInterface $form, array $content, int $id): User
+    private function update(array $content, int $id): User
     {
         $user = $this->exists($id, false);
         $client = $this->client_service->getClientFromUsername(
             $content[$this->auth_service::AUTH_UID]
         );
         $this->checkOwner($user, $client);
-
-        // $updated_user = $this->updateProperties($user, $form->getData());
-
-        return $user;
-    }
-
-    /**
-     * Updates a user properties
-     */
-    private function updateProperties(User $user, User $new_data): User
-    {
-        foreach (User::PROPERTIES as $property) {
-            $property_name = ucfirst($property);
-            $setter = sprintf('set%s', $property_name);
-            $getter = sprintf('get%s', $property_name);
-            $value = $new_data->$getter();
-
-            if (!$value || $value === $user->$getter()) {
-                $user->$setter($new_data->$getter());
-            }
-        }
 
         return $user;
     }
@@ -288,7 +267,7 @@ class UserService
      * @param Request $request The controller request
      * @param int     $id      The user id
      * 
-     * @return Response The empty response.
+     * @return Response The empty response
      */
     public function delete(Request $request, int $id): Response
     {
@@ -305,7 +284,7 @@ class UserService
     }
 
     /**
-     * Generate Hateoas links for users
+     * Generate Hateoas links for users.
      * 
      * @param int $id The user id
      * 

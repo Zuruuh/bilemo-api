@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ApiService
 {
-    const INVALID_REQ = "Invalid request, you need to specify a '%s' property";
+    public const INVALID_REQ = "Invalid request, you need to specify a '%s' property";
 
     /**
      * Returns an object depending on the form validation.

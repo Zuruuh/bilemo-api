@@ -12,9 +12,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
-    const PRODUCT_AMOUNT = 110;
-    const CLIENT_AMOUNT = 15;
-    const USERS_PER_CLIENT = 35;
+    public const PRODUCT_AMOUNT = 110;
+    public const CLIENT_AMOUNT = 15;
+    public const USERS_PER_CLIENT = 35;
 
     private UserPasswordHasherInterface $hasher;
 

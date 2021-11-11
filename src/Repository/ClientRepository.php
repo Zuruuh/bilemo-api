@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Client;
-use App\Repository\FullEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
