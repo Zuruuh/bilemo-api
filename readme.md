@@ -36,4 +36,8 @@ Once all the docker containers are up and running, just head to https://app.bile
 
 ## Usage
 
+To use and test the api, you'll have to login with the default admin account. Here are the credentials (dev env only):
+**Username**: "admin"
+**Password**: "password"
+
 If you need informations about a specific route or entity, you can take a look at [the docs](./docs/app.md), or hit the /api/docs api endpoint.
