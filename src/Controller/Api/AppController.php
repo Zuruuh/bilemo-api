@@ -5,7 +5,6 @@ namespace App\Controller\Api;
 use App\Service\DocsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -28,8 +27,8 @@ class AppController extends AbstractController
     }
 
     #[Route('/docs/{doc}', methods: ['GET'])]
-    public function doc(mixed $doc = ''): Response
+    public function doc(mixed $doc = 'app'): Response
     {
-        return $this->docs_service->getHtmlContent($doc === '' ? 'app' : (string) $doc);
+        return $this->docs_service->getHtmlContent((string) $doc);
     }
 }
