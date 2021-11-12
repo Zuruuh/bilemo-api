@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class ProductService
 {
@@ -14,13 +16,16 @@ class ProductService
 
     private ProductRepository $product_repo;
     private RouterInterface   $router;
+    private CacheInterface $cache;
 
     public function __construct(
         ProductRepository $product_repo,
-        RouterInterface $router
+        RouterInterface   $router,
+        CacheInterface $cache
     ) {
         $this->product_repo = $product_repo;
         $this->router = $router;
+        $this->cache = $cache;
     }
 
     /**
@@ -36,17 +41,20 @@ class ProductService
         $cursor = $request->query->getInt('cursor');
         $cursor = min($cursor, $total);
 
-        $products_array = $this->product_repo->findByCursor($cursor);
+        $products = $this->cache->get('products-' . $cursor, function (ItemInterface $item) use ($cursor) {
+            $item->expiresAfter(60 * 60);
+            $products_array = $this->product_repo->findByCursor($cursor);
 
-        $products = array_map(function ($product) {
-            $entity = $product;
-            $entity['_links'] = $this->generateLinks($product['id']);
+            return array_map(function ($product) {
+                $entity = $product;
+                $entity['_links'] = $this->generateLinks($product['id']);
 
-            return $entity;
-        }, $products_array);
+                return $entity;
+            }, $products_array);
+        });
 
         return new JsonResponse(
-            ['products' => $products],
+            ['products' => $products ?? []],
             empty($products) ? 404 : 200 // 302: Found ?
         );
     }
@@ -60,8 +68,13 @@ class ProductService
      */
     public function getProduct(int $id): JsonResponse
     {
-        $product = $this->exists($id);
-        $product['_links'] = $this->generateLinks($id);
+        $product = $this->cache->get('product-' . $id, function (ItemInterface $item) use ($id) {
+            $item->expiresAfter(60 * 60);
+            $prod = $this->exists($id);
+            $prod['_links'] = $this->generateLinks($id);
+
+            return $prod;
+        });
 
         return new JsonResponse($product);
     }

@@ -7,6 +7,8 @@ use Michelf\Markdown;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class DocsService
 {
@@ -15,9 +17,13 @@ class DocsService
     public const DOC_DOES_NOT_EXIST = 'There are not documents with the name "%s"';
 
     private RouterInterface $router;
+    private CacheInterface  $cache;
 
-    public function __construct(RouterInterface $router)
-    {
+    public function __construct(
+        RouterInterface $router,
+        CacheInterface $cache
+    ) {
+        $this->cache = $cache;
         $this->router = $router;
     }
 
@@ -30,13 +36,18 @@ class DocsService
      */
     public function getHtmlContent(string $filename): Response
     {
-        $path = $this->getRealPath($filename);
-        $this->fileIsValid($path, $filename);
+        $doc = $this->cache->get('docs-' . $filename, function (ItemInterface $item) use ($filename) {
+            $item->expiresAfter(60 * 60);
 
-        $content = file_get_contents($path);
-        $markdown = Markdown::defaultTransform($content);
+            $path = $this->getRealPath($filename);
+            $this->fileIsValid($path, $filename);
 
-        return new Response($this->replaceLinks($markdown), 200);
+            $content = file_get_contents($path);
+            $markdown = Markdown::defaultTransform($content);
+            return $this->replaceLinks($markdown);
+        });
+
+        return new Response($doc, 200);
     }
 
     /**

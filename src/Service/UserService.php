@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class UserService
 {
@@ -22,6 +24,7 @@ class UserService
     private ClientService          $client_service;
     private EntityManagerInterface $em;
     private RouterInterface        $router;
+    private TagAwareCacheInterface $cache;
 
     public const USER_DOES_NOT_EXIST = 'There are no user with the id %s';
     public const USER_CREATE_SUCCESS = 'User "%s" with id #%s has been successfully created !';
@@ -35,6 +38,7 @@ class UserService
         ClientService $client_service,
         EntityManagerInterface $em,
         RouterInterface $router,
+        TagAwareCacheInterface $cache,
     ) {
         $this->user_repo = $user_repo;
         $this->auth_service = $auth_service;
@@ -42,6 +46,7 @@ class UserService
         $this->client_service = $client_service;
         $this->em = $em;
         $this->router = $router;
+        $this->cache = $cache;
     }
 
     /**
@@ -53,31 +58,35 @@ class UserService
      */
     public function getOwnPaginatedUsers(Request $request): JsonResponse
     {
-        $client = $this->client_service->getClientFromUsername(
-            $request->getContent()[AuthService::AUTH_UID]
-        );
+        $username = $request->getContent()[AuthService::AUTH_UID];
+        $client = $this->client_service->getClientFromUsername($username);
 
         $total = $this->user_repo->count(['client' => $client]);
         $cursor = $request->query->getInt('cursor');
         $cursor = min($cursor, $total);
 
-        $users = $this->user_repo->findByCursor($cursor, ['client' => $client->getId()]);
+        $users = $this->cache->get("users-$username-$cursor", function (ItemInterface $item) use ($client, $cursor, $username) {
+            $item->expiresAfter(60 * 60);
+            $item->tag('user-' . $username);
 
-        $entity_cursor = $cursor;
-        $usersArray = [];
-        foreach ($users as $user) {
-            ++$entity_cursor;
-            $entity = (array) $user;
+            $usersList = $this->user_repo->findByCursor($cursor, ['client' => $client->getId()]);
 
-            $usersArray[] = [
-                ...$entity,
-                '_links' => $this->generateLinks($user['id']),
-                'cursor' => $entity_cursor
-            ];
-        }
+            $entity_cursor = $cursor;
+            $usersArray = [];
+            foreach ($usersList as $user) {
+                ++$entity_cursor;
+                $entity = (array) $user;
+                $entity['_links'] = $this->generateLinks($user['id']);
+                $entity['cursor'] = $entity_cursor;
+
+                $usersArray[] = $entity;
+            }
+            return $usersArray;
+        });
+
 
         return new JsonResponse(
-            ['users' => $usersArray],
+            ['users' => $users],
             empty([$users]) ? 404 : 200 // 302: Found ?
         );
     }
@@ -92,10 +101,18 @@ class UserService
      */
     public function getOne(Request $request, int $id): JsonResponse
     {
-        $client = $this->client_service->getClientFromUsername($request->getContent()[AuthService::AUTH_UID]);
-        $user = $this->exists($id);
-        $this->checkOwner($user, $client);
-        $user['_links'] = $this->generateLinks($user['id']);
+        $username = $request->getContent()[AuthService::AUTH_UID];
+        $client = $this->client_service->getClientFromUsername($username);
+        $user = $this->cache->get("user-$username-$id", function (ItemInterface $item) use ($client, $id, $username) {
+            $item->expiresAfter(60 * 60);
+            $item->tag('user-' . $username);
+
+            $user = $this->exists($id);
+            $this->checkOwner($user, $client);
+            $user['_links'] = $this->generateLinks($user['id']);
+
+            return $user;
+        });
 
         return new JsonResponse(['user' => $user]);
     }
@@ -169,6 +186,8 @@ class UserService
         }
         $user['_links'] = $this->generateLinks($user['id']);
 
+        $this->cache->invalidateTags(['user-' . $request->getContent()[AuthService::AUTH_UID]]);
+
         return new JsonResponse(
             [
                 'message' => sprintf(self::USER_CREATE_SUCCESS, $user['name'], $user['id']),
@@ -231,6 +250,8 @@ class UserService
         $user_as_array = $this->user_repo->findOneByWithArray(['id' => $user_id])[0];
         $user_as_array['_links'] = $this->generateLinks($user_id);
 
+        $this->cache->invalidateTags(['user-' . $request->getContent()[AuthService::AUTH_UID]]);
+
         return new JsonResponse(
             [
                 'message' => sprintf(self::USER_EDIT_SUCCESS, $user->getName(), $user_id),
@@ -279,6 +300,8 @@ class UserService
 
         $this->em->remove($user);
         $this->em->flush();
+
+        $this->cache->invalidateTags(['user-' . $client->getUserIdentifier()]);
 
         return new Response('', 204);
     }
