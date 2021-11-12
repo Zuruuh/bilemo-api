@@ -30,10 +30,10 @@ install: .env.local build start keys db
 reset: ## Stop and start a fresh install of the project
 reset: kill install
 
-start: ## Start the project
+start: ## Start the containers
 	$(DOCKER_COMPOSE) up -d --remove-orphans --no-recreate
 
-stop: ## Stop the project
+stop: ## Stop the containers
 	$(DOCKER_COMPOSE) stop
 
 clean: ## Stop the project and remove generated files
