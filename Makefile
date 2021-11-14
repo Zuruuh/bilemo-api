@@ -24,15 +24,16 @@ kill:
 	$(DOCKER_COMPOSE) down --volumes --remove-orphans
 
 install: ## Install and start the project
-install: .env.local build start db
+install: .env.local build start keys db
+#install: env .env.local build start db
 
 reset: ## Stop and start a fresh install of the project
 reset: kill install
 
-start: ## Start the project
+start: ## Start the containers
 	$(DOCKER_COMPOSE) up -d --remove-orphans --no-recreate
 
-stop: ## Stop the project
+stop: ## Stop the containers
 	$(DOCKER_COMPOSE) stop
 
 clean: ## Stop the project and remove generated files
@@ -62,6 +63,13 @@ migration: ## Create a new doctrine migration
 migration: vendor
 	$(SYMFONY) doctrine:migrations:diff
 
+migrate: ## Migrates db to latest saved migration
+migrate: vendor
+	$(SYMFONY) doctrine:migration:migrate --no-interaction
+
+db-update-schema: ## Creates a new migrations and runs it
+db-update-schema: migration migrate
+
 db-validate-schema: ## Validate the database schema
 db-validate-schema: .env.local vendor
 	$(SYMFONY) doctrine:schema:validate
@@ -83,7 +91,21 @@ vendor: composer.lock
 		cp .env .env.local;\
 	fi
 
-.PHONY: db migration db-validate-schema
+env:
+	@if [ -f .env.local ]; \
+	then\
+		echo '.env.local already exists.';\
+	else\
+		touch .env.local;\
+		echo 'APP_ENV=dev' >> .env.local;\
+		echo 'APP_SECRET=bed224227aa1bd358ebc5c3d12cceb56' >> .env.local;\
+		echo 'DATABASE_URL="postgresql://symfony:symfony@database/app"' >> .env.local;\
+	fi
+
+keys: vendor start
+	$(EXEC_PHP) bin/console lexik:jwt:generate-keypair --skip-if-exists
+
+.PHONY: db migration migrate db-update-schema db-validate-schema env keys
 
 ## 
 ## -----
@@ -91,18 +113,11 @@ vendor: composer.lock
 ## 
 ## 
 
-test: ## Run unit and functional tests
-test: tu tf
+test: ## Run all tests in the tests/ folder
+test:
+	$(EXEC_PHP) bin/phpunit
 
-tu: ## Run unit tests
-tu: vendor
-	$(EXEC_PHP) bin/phpunit --exclude-group functional
-
-tf: ## Run functional tests
-tf: vendor
-	$(EXEC_PHP) bin/phpunit --group functional
-
-.PHONY: test tu tf
+.PHONY: test
 
 
 .DEFAULT_GOAL := help
