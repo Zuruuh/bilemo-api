@@ -16,7 +16,7 @@ docker -v
 docker-compose -v
 make -v
 ```
-If these 3 softwares are installed properly, you don't have to worry about any other php or postgres dependencies, as everything will be managed in docker containers. (Having php, composer, symfony cli, etc... installed on your computer will help to write commands faster, but is completely optionnal).  
+If these 3 softwares are installed properly, you don't have to worry about any other php or postgres dependencies, as everything will be managed in docker containers. (Having php, composer, symfony cli, etc... installed on your computer will help writing commands faster, but is completely optionnal).  
 
 ### Running the project
 
